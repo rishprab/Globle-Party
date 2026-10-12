@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Play — Globle Party</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea; --panel: #ffffff; --panel2: #f8f6f1; --ink: #1d2433; --muted: #6b7280; --line: #e4dfd3;
+    --accent: #e4572e; --green: #2f9e58; --gold: #ffd56b; --navy: #0e1738;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px 16px 60px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1, h2, h3 { font-family: "Fredoka", -apple-system, sans-serif; }
+  a.back { display: inline-block; color: var(--muted); text-decoration: none; font-size: 0.85rem; margin-bottom: 14px; }
+  h1 { font-size: 1.9rem; margin: 0 0 6px; }
+  h1 span { color: var(--accent); }
+  p.sub { color: var(--muted); font-size: 0.95rem; margin: 0 0 22px; line-height: 1.55; }
+  h2 { font-size: 1.25rem; margin: 30px 0 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .card p { margin: 0 0 8px; font-size: 0.93rem; line-height: 1.55; }
+  .card p:last-child { margin-bottom: 0; }
+  em { font-style: normal; font-weight: 700; color: var(--accent); }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  .steps li { counter-increment: s; position: relative; padding-left: 40px; margin-bottom: 16px; font-size: 0.93rem; line-height: 1.5; }
+  .steps li:last-child { margin-bottom: 0; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .mode .ico { font-size: 1.6rem; }
+  .mode h3 { margin: 4px 0 4px; font-size: 1.1rem; }
+  .mode p { margin: 0; font-size: 0.86rem; color: var(--muted); line-height: 1.45; }
+  .tip { font-size: 0.84rem; color: var(--muted); font-style: italic; margin-top: 10px; }
+  .jump { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
+  .jump a { display: block; text-decoration: none; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px; }
+  .jump a b { display: block; font-family: "Fredoka", sans-serif; font-size: 1.05rem; }
+  .jump a span { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+  .part { display: flex; align-items: center; gap: 10px; margin: 40px 0 6px; padding: 14px 16px; border-radius: 16px; color: #fff; }
+  .part h2 { margin: 0; color: #fff; font-size: 1.45rem; }
+  .part p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.9; }
+  .part .big { font-size: 2rem; }
+  .part.start { background: linear-gradient(135deg, #2c46a0, #0e1738); }
+  .part.quiz { background: linear-gradient(135deg, #7c3aed, #4f46e5); }
+  .part.buzz { background: linear-gradient(135deg, #d62020, #6e0909); }
+  .part.race { background: linear-gradient(135deg, #e4572e, #b2182b); }
+  .part.team { background: linear-gradient(135deg, #2f9e58, #14532d); }
+  table.pts { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  table.pts td { padding: 7px 4px; border-top: 1px solid var(--line); }
+  table.pts tr:first-child td { border-top: none; }
+  table.pts td:last-child { text-align: right; font-weight: 800; white-space: nowrap; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 12px; }
+  .opts div { border-radius: 10px; padding: 10px; color: #fff; font-family: "Fredoka", sans-serif; font-weight: 700; text-align: center; }
+  .buzzdemo { display: flex; justify-content: center; padding: 14px; background: #1a0d1e; border-radius: 14px; margin-bottom: 12px; }
+  .buzzdemo span { width: 110px; height: 110px; border-radius: 50%; border: 6px solid #ffd2d2; background: radial-gradient(circle at 40% 35%, #ff6b6b 0%, #d62020 60%, #9e1010 100%); color: #fff; font-family: "Fredoka", sans-serif; font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 7px 0 #6e0909; }
+  .scale { height: 16px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.08); margin: 6px 0; background: linear-gradient(90deg, #fef3c4, #fde49a, #fcca6e, #f9a95a, #ef7b3c, #d6452a, #b2182b, #7a0019); }
+  .scale-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .radar { display: flex; gap: 14px; align-items: center; background: radial-gradient(ellipse at 35% 50%, #12224f 0%, #0a1230 60%, #050817 100%); border-radius: 14px; padding: 14px; color: #fff; margin-bottom: 10px; }
+  .radar svg { flex: 0 0 auto; }
+  .radar p { margin: 0; font-size: 0.86rem; line-height: 1.45; color: #d6deff; }
+  .faq > div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .faq > div:first-child { padding-top: 0; }
+  .faq > div:last-child { border-bottom: none; padding-bottom: 0; }
+  .faq h3 { margin: 0 0 4px; font-size: 1rem; }
+  .faq p { color: var(--muted); }
+  @media (max-width: 520px) { .jump, .modes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="javascript:window.close()">← Close this tab</a>
+  <h1>🎉 How to Play Globle <span>Party</span></h1>
+  <p class="sub">The world geography party game. Everyone plays on their own phone, with an optional big screen for the whole room to watch. Three games, teams if you want them, and a live leaderboard.</p>
+
+  <div class="jump">
+    <a href="#quiz"><b>🎯 Quiz Show</b><span>A country glows. Everyone answers. Fastest right answer scores most.</span></a>
+    <a href="#buzz"><b>🔔 Buzzer Battle</b><span>First to buzz gets to answer. Get it wrong and others can steal.</span></a>
+    <a href="#race"><b>🌡️ Hot &amp; Cold Race</b><span>Race to find the mystery country on your own globe.</span></a>
+  </div>
+
+  <div class="part start" id="start"><span class="big">📺</span><div><h2>Getting started</h2><p>Set up a game in under a minute.</p></div></div>
+
+  <h2>🏠 Two ways to host</h2>
+  <div class="modes">
+    <div class="mode">
+      <div class="ico">📺</div>
+      <h3>Host on this screen</h3>
+      <p>Open the game on a laptop or TV and it becomes the big shared screen showing the globe, the answers and the leaderboard. The host joins on their phone too, so they can play.</p>
+    </div>
+    <div class="mode">
+      <div class="ico">📱</div>
+      <h3>Host from my phone (no TV)</h3>
+      <p>No big screen needed. Every phone shows the globe and the results, and the host runs the game from their phone while playing at the same time.</p>
+    </div>
+  </div>
+
+  <h2>👋 Joining</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><strong>Scan the QR code</strong> on the big screen, or open the game and tap <em>Join a game</em> and type the 4-letter room code.</li>
+      <li><strong>Pick a name, an animal avatar and a colour.</strong> They're remembered for next time.</li>
+      <li><strong>Wait in the lobby.</strong> You'll see everyone who's joined. If teams are on, you can pick your team here.</li>
+    </ol>
+    <p class="tip">Best with 3–6 players, but it works with 12 or more. The screens shrink to fit everyone.</p>
+  </div>
+
+  <h2>⚙️ Lobby settings (host)</h2>
+  <div class="card">
+    <p><strong>Game:</strong> Quiz Show, Buzzer Battle or Hot &amp; Cold Race.</p>
+    <p><strong>Answers:</strong> <em>Multiple choice</em> (four coloured buttons) or <em>Typing</em> (type the name or pick it from the list). One style for the whole game. Not used in the Race.</p>
+    <p><strong>Rounds:</strong> how many countries to play (5–20, or 3–10 for the Race).</p>
+    <p><strong>Timer:</strong> seconds to answer in Quiz Show, seconds to buzz in Buzzer Battle, or a round time limit of 2–5 minutes in the Race.</p>
+    <p><strong>Teams:</strong> off, or 2, 3 or 4 teams. See <a href="#teams">Teams</a> below.</p>
+  </div>
+
+  <div class="part quiz" id="quiz"><span class="big">🎯</span><div><h2>Quiz Show</h2><p>Everyone answers every question. Speed counts.</p></div></div>
+
+  <h2>🎯 How it works</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><strong>A country glows purple.</strong> The globe swings round so you can see the continent, pauses, then zooms in. Tiny countries get a pulsing ring.</li>
+      <li><strong>Answer on your phone</strong> before the timer runs out, by tapping one of four choices or typing the name.</li>
+      <li><strong>Drumroll…</strong> Once everyone's locked in (or time's up), see how everyone answered, then the right answer turns green.</li>
+      <li><strong>Leaderboard.</strong> Watch the rankings shuffle, then it's on to the next country.</li>
+    </ol>
+    <div class="opts">
+      <div style="background:#c2401b">▲ Peru</div><div style="background:#2f6fb0">◆ Bolivia</div>
+      <div style="background:#f2b632;color:#231300">● Chile</div><div style="background:#237a43">■ Ecuador</div>
+    </div>
+    <p class="tip">The wrong choices are sneaky. They're usually the country's neighbours.</p>
+  </div>
+
+  <h2>⚡ Scoring</h2>
+  <div class="card">
+    <table class="pts">
+      <tr><td>Right answer, instantly</td><td>1,000</td></tr>
+      <tr><td>Right answer, just before time runs out</td><td>500</td></tr>
+      <tr><td>Answer streak (2 in a row, 3 in a row…)</td><td>+100 each, up to +500</td></tr>
+      <tr><td>Wrong or no answer</td><td>0</td></tr>
+    </table>
+    <p class="tip">The faster you answer, the more you score, so trust your gut!</p>
+  </div>
+
+  <div class="part buzz" id="buzz"><span class="big">🔔</span><div><h2>Buzzer Battle</h2><p>Only the fastest buzzer gets a shot.</p></div></div>
+
+  <h2>🔔 How it works</h2>
+  <div class="card">
+    <div class="buzzdemo"><span>BUZZ!</span></div>
+    <ol class="steps">
+      <li><strong>A country glows</strong> and every phone shows a big red <em>BUZZ!</em> button.</li>
+      <li><strong>Buzz if you know it.</strong> The fastest buzz wins the right to answer, and the big screen shows who buzzed first and by how much.</li>
+      <li><strong>Answer quickly.</strong> You get 7 seconds to tap one of four choices, or 12 seconds to type it.</li>
+      <li><strong>Right?</strong> You score. <strong>Wrong (or out of time)?</strong> You're locked out of that country and it's a <em>STEAL!</em> The buzzers reopen for everyone else.</li>
+      <li>If nobody gets it before time runs out, the answer is revealed and nobody scores.</li>
+    </ol>
+  </div>
+
+  <h2>⚡ Scoring &amp; rules</h2>
+  <div class="card">
+    <table class="pts">
+      <tr><td>Right answer after a lightning-fast buzz</td><td>up to 1,000</td></tr>
+      <tr><td>Right answer after a slow buzz</td><td>500+</td></tr>
+      <tr><td>Countries won in a row</td><td>+100 each, up to +500</td></tr>
+      <tr><td>Wrong answer</td><td>0, and you're out for that country</td></tr>
+    </table>
+    <p style="margin-top:10px"><strong>No jumping the gun.</strong> A buzz button appears during the countdown too. Tap it before the country appears and you're locked out for 2 seconds.</p>
+    <p><strong>Steals:</strong> in multiple choice, the wrong answer is crossed out for whoever steals.</p>
+    <p><strong>With teams:</strong> a wrong answer locks out the whole team, so the steal goes to another team.</p>
+  </div>
+
+  <div class="part race" id="race"><span class="big">🌡️</span><div><h2>Hot &amp; Cold Race</h2><p>Everyone hunts the same mystery country. First to find it wins the round.</p></div></div>
+
+  <h2>🌡️ How it works</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><strong>Everyone gets their own globe</strong> on their phone with the same hidden mystery country. Drag to spin it, pinch or scroll to zoom.</li>
+      <li><strong>Guess any country.</strong> It's coloured by how close it is to the mystery country, and you get a message: 🔥 Warmer or 🧊 Colder.</li>
+      <li><strong>Follow the heat.</strong> Your guesses are listed closest first, with the distance in km.</li>
+      <li><strong>Find it!</strong> It turns green and you're done. The moment the first person finds it, everyone else has <em>60 seconds</em> left.</li>
+      <li>The round ends when that countdown runs out, when everyone has found it, or when the round time limit is reached.</li>
+    </ol>
+    <div class="scale"></div>
+    <div class="scale-labels"><span>🧊 Far away</span><span>Bordering 🔥</span></div>
+    <p class="tip">Distance is measured edge to edge, so a country that shares a border with the answer shows as "Bordering", the hottest colour. Watch out for overseas territories: France's islands make it "near" all sorts of places.</p>
+  </div>
+
+  <h2>📡 The radar</h2>
+  <div class="card">
+    <div class="radar">
+      <svg width="96" height="96" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="48" fill="#1a3a6e" fill-opacity="0.5" stroke="#7fb6dd" stroke-opacity="0.4"/>
+        <circle cx="50" cy="50" r="34" fill="#e0a92c" fill-opacity="0.12" stroke="#fde49a" stroke-opacity="0.5"/>
+        <circle cx="50" cy="50" r="21" fill="#d6452a" fill-opacity="0.25" stroke="#ff9b9b" stroke-opacity="0.6"/>
+        <circle cx="50" cy="50" r="7" fill="#7a0019" stroke="#ff6b6b"/>
+        <circle cx="50" cy="50" r="6" fill="#e0a92c" stroke="#ffd56b" stroke-width="2"/>
+        <circle cx="74" cy="34" r="6" fill="#7b5ea7" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="22" cy="68" r="6" fill="#3fa7d6" stroke="#fff" stroke-width="1.5"/>
+        <circle cx="86" cy="76" r="6" fill="#2f9e58" stroke="#fff" stroke-width="1.5"/>
+      </svg>
+      <p>The big screen shows a radar of everyone in the race. Each avatar creeps towards the middle as that player's closest guess gets nearer. Badges show how many guesses they've made. Nobody's actual guesses are shown until the round ends.</p>
+    </div>
+    <p>No big screen? Tap the 📡 radar button at the top of your phone for a mini version.</p>
+    <p>You'll also get pop-ups on your phone when someone is <strong>bordering</strong> the country or <strong>finds it</strong>, so you know when to hurry!</p>
+  </div>
+
+  <h2>⚡ Scoring</h2>
+  <div class="card">
+    <table class="pts">
+      <tr><td>1st to find it</td><td>1,000</td></tr>
+      <tr><td>2nd · 3rd · 4th</td><td>800 · 640 · 512</td></tr>
+      <tr><td>Everyone else who finds it</td><td>keeps dropping, never below 300</td></tr>
+      <tr><td>Didn't find it, but bordering</td><td>200</td></tr>
+      <tr><td>Didn't find it, closest guess further away</td><td>less the further away (0–200)</td></tr>
+    </table>
+    <p class="tip">At the end of the round, the big screen shows everyone's guesses on the globe in hot and cold colours, all around the answer.</p>
+  </div>
+
+  <div class="part team" id="teams"><span class="big">🤝</span><div><h2>Teams</h2><p>Works with all three games.</p></div></div>
+
+  <h2>🤝 Playing in teams</h2>
+  <div class="card">
+    <p>Set <strong>Teams</strong> to 2, 3 or 4 in the lobby: 🦘 Kangaroo, 🥝 Kiwi, 🦜 Toucan and 🐧 Penguin. New players go to the smallest team automatically. Players can switch team on their phone, and the host can tap a player on the big screen to move them, or hit <em>🔀 Shuffle teams</em>.</p>
+    <p><strong>Team score = the average of its players' scores</strong>, so a team of 2 can beat a team of 4.</p>
+    <p><strong>Team bonus:</strong> in Quiz Show and the Race, if everyone on a team gets it right (or finds it), the team gets <em>+100</em>.</p>
+    <p>Between rounds, two teams battle in a <strong>tug of war</strong>, and three or four teams go head to head in a <strong>team race</strong>. There's a Round MVP too.</p>
+  </div>
+
+  <h2>👑 Host controls</h2>
+  <div class="card">
+    <p><strong>Skip ▶</strong> moves straight to the next step. Handy if someone wandered off mid-question.</p>
+    <p><strong>Play again</strong> on the final podium takes everyone back to the lobby with the same players, ready to pick a new game.</p>
+    <p><strong>End game</strong> closes the room for everyone.</p>
+  </div>
+
+  <h2>❓ Quick questions</h2>
+  <div class="card faq">
+    <div>
+      <h3>My phone dropped out. Can I get back in?</h3>
+      <p>Yes. Open the game again in the same browser and tap <strong>Rejoin</strong>, or scan the QR code again. You keep your score.</p>
+    </div>
+    <div>
+      <h3>Two of us tried to join from the same laptop</h3>
+      <p>Each browser counts as one player, so two tabs in the same browser are the same person. Use separate devices, or a private/incognito window for the second player.</p>
+    </div>
+    <div>
+      <h3>It says "This game has been updated"</h3>
+      <p>Your device had an older saved copy of the game. Tap <strong>Update now</strong> and you'll be put straight back in the same room.</p>
+    </div>
+    <div>
+      <h3>The big screen froze or went to sleep</h3>
+      <p>The hosting screen (or the host's phone with no TV) runs the game's timers. The game asks it to stay awake, but keep it plugged in and on the game's tab. If it does sleep, wake it up and the game carries on.</p>
+    </div>
+    <div>
+      <h3>It doesn't recognise the name I typed</h3>
+      <p>Most common names work, like "USA", "UK", "Holland", "Burma", "Ivory Coast" and "DRC". If you're unsure, start typing and pick from the suggestions, or tap the empty box to scroll through all 195 countries.</p>
+    </div>
+    <div>
+      <h3>Which countries are in the game?</h3>
+      <p>All 195 recognised countries: the 193 UN members plus Vatican City and Palestine.</p>
+    </div>
+  </div>
+
+  <p class="tip" style="margin-top:24px;text-align:center">Gather the crew, grab your phones, and may the best globetrotter win. 🌍</p>
+
+</div>
+</body>
+</html>
