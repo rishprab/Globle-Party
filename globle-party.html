@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Globle Party</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea; --panel: #ffffff; --panel2: #f8f6f1; --ink: #1d2433; --muted: #5f6673; --line: #e4dfd3;
+    --accent: #e4572e; --accent-dark: #c2401b; --green: #2f9e58; --purple: #7c3aed; --gold: #ffd56b;
+    --navy: #0e1738; --navy2: #070b1d; --tvmuted: #b7c3ef;
+    --a0: #c2401b; --a1: #2f6fb0; --a2: #f2b632; --a3: #237a43;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  body.tvmode { background: radial-gradient(ellipse at 50% -10%, #2c46a0 0%, var(--navy) 60%, var(--navy2) 100%); background-attachment: fixed; color: #fff; overflow: hidden; }
+  h1, h2, h3, .fred { font-family: Fredoka, Nunito, sans-serif; }
+  button { font-family: inherit; cursor: pointer; }
+  .view { display: none; }
+  .view.on { display: block; }
+  .sub { display: none; }
+  .sub.on { display: flex; }
+  .hidden { display: none !important; }
+
+  /* ---------- shared bits ---------- */
+  .btn { display: block; width: 100%; border: none; border-radius: 14px; padding: 15px; font-size: 1.05rem; font-weight: 800; background: var(--accent); color: #fff; box-shadow: 0 4px 0 var(--accent-dark); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-dark); }
+  .btn:disabled { opacity: 0.45; }
+  .btn.ghost { background: var(--panel); color: var(--ink); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); }
+  .btn.gold { background: linear-gradient(180deg, #ffd56b, #e0a92c); color: #231300; box-shadow: 0 4px 0 #9a6f12; }
+  .btn.small { padding: 10px 14px; font-size: 0.92rem; width: auto; display: inline-block; }
+  .lbl { font-size: 0.75rem; font-weight: 800; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 7px; }
+  .seg { display: flex; gap: 4px; background: #ebe6da; border-radius: 12px; padding: 4px; }
+  .seg button { flex: 1; border: none; border-radius: 9px; padding: 10px 4px; background: transparent; font-weight: 700; color: #4b5563; font-size: 0.92rem; }
+  .seg button.sel { background: var(--panel); color: var(--ink); font-weight: 800; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+  .tvmode .seg { background: rgba(255,255,255,0.1); }
+  .tvmode .seg button { color: var(--tvmuted); }
+  .tvmode .seg button.sel { background: var(--gold); color: #231300; }
+  .av { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; line-height: 1; }
+  .toast { position: fixed; left: 50%; top: 14px; transform: translate(-50%, -10px); background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 300; max-width: 92vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 250; }
+  @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+  .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+
+  /* ---------- home / join (phone style) ---------- */
+  .wrap { max-width: 480px; margin: 0 auto; padding: 22px 18px 40px; }
+  .brand { font-family: Fredoka, sans-serif; font-size: 2.4rem; font-weight: 700; text-align: center; margin: 6px 0 2px; }
+  .brand span { color: var(--accent); }
+  .tagline { text-align: center; color: var(--muted); margin: 0 0 22px; }
+  .bigchoice { display: flex; gap: 14px; align-items: center; text-align: left; width: 100%; background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; color: var(--ink); }
+  .bigchoice .ic { width: 52px; height: 52px; border-radius: 14px; background: #fff1ec; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .bigchoice b { display: block; font-size: 1.1rem; }
+  .bigchoice span { font-size: 0.86rem; color: var(--muted); }
+  .bigchoice:active { border-color: var(--accent); }
+  input.text { width: 100%; font-size: 1.1rem; padding: 14px; border-radius: 14px; border: 2px solid var(--line); background: #fff; color: var(--ink); font-family: inherit; outline: none; }
+  input.text:focus { border-color: var(--accent); }
+  input.code { font-family: Fredoka, sans-serif; font-size: 1.9rem; letter-spacing: 0.4em; text-align: center; text-transform: uppercase; }
+  .emojis { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+  .emojis button { height: 44px; border-radius: 12px; border: 2px solid var(--line); background: #fff; font-size: 1.45rem; padding: 0; }
+  .emojis button.sel { border-color: var(--accent); background: #fff1ec; transform: scale(1.06); }
+  .colors { display: flex; gap: 8px; flex-wrap: wrap; }
+  .colors button { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px var(--line); }
+  .colors button.sel { box-shadow: 0 0 0 3px var(--ink); }
+  .preview { display: flex; align-items: center; gap: 12px; justify-content: center; margin: 20px 0 14px; font-weight: 800; font-size: 1.2rem; }
+  .err { color: #b91c1c; font-weight: 700; text-align: center; min-height: 1.2em; margin-top: 8px; }
+  .rejoin { background: #eef5fc; border: 2px solid #b6d2ee; border-radius: 16px; padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 10px; align-items: center; }
+  .rejoin div { flex: 1; font-size: 0.92rem; }
+
+  /* ---------- TV ---------- */
+  #v-tv { height: 100vh; font-size: clamp(14px, 1.45vw, 30px); }
+  .tvbar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 0.8em; padding: 1em 2em; z-index: 5; }
+  .tvbar .t { font-family: Fredoka, sans-serif; font-weight: 700; font-size: 1.5em; }
+  .tvbar .t span { color: var(--gold); }
+  .tvbar .sp { flex: 1; }
+  .tvbar .chip { background: rgba(255,255,255,0.12); border-radius: 30px; padding: 0.35em 0.9em; font-weight: 800; }
+  .tvbtn { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 30px; padding: 0.45em 1em; font-weight: 800; font-size: 0.85em; }
+  .tvscreen { position: absolute; inset: 0; padding: 5.2em 2.4em 2em; flex-direction: column; }
+
+  /* TV lobby */
+  .tvlobby { display: grid; grid-template-columns: 19em 1fr; gap: 2em; height: 100%; }
+  .joincard { background: rgba(255,255,255,0.06); border: 2px solid rgba(231,198,107,0.5); border-radius: 1.2em; padding: 1.4em; display: flex; flex-direction: column; align-items: center; gap: 0.7em; text-align: center; }
+  .joincard .url { font-weight: 800; font-size: 0.95em; word-break: break-all; }
+  .qr { background: #fff; border-radius: 0.8em; padding: 0.6em; width: 10em; height: 10em; display: flex; align-items: center; justify-content: center; }
+  .qr img, .qr canvas { width: 100% !important; height: 100% !important; }
+  .roomcode { font-family: Fredoka, sans-serif; font-size: 4em; font-weight: 700; letter-spacing: 0.12em; color: var(--gold); line-height: 1; }
+  .tvmuted { color: var(--tvmuted); font-weight: 700; }
+  .lobbyright { display: flex; flex-direction: column; gap: 1em; min-height: 0; }
+  .pgrid { display: grid; gap: 0.8em; align-content: start; overflow: hidden; }
+  .pgrid[data-size="l"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pgrid[data-size="m"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pgrid[data-size="s"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pcard { background: rgba(255,255,255,0.08); border-radius: 1em; padding: 0.8em; display: flex; align-items: center; gap: 0.7em; animation: popIn 0.4s cubic-bezier(.2,1.5,.4,1); min-width: 0; }
+  .pcard .nm { font-weight: 800; font-size: 1.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pcard.off { opacity: 0.4; }
+  .pgrid[data-size="s"] .pcard { flex-direction: column; text-align: center; padding: 0.6em 0.3em; gap: 0.3em; }
+  .pgrid[data-size="s"] .pcard .nm { font-size: 0.85em; max-width: 100%; }
+  .settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1em; background: rgba(255,255,255,0.05); border-radius: 1em; padding: 0.9em 1em; }
+  .settings .lbl { color: var(--tvmuted); margin: 0 0 0.4em; font-size: 0.7em; }
+  .settings .seg button { font-size: 0.8em; padding: 0.55em 0.2em; }
+
+  /* TV count */
+  .tvcount { align-items: center; justify-content: center; text-align: center; gap: 0.5em; }
+  .tvcount .q { font-family: Fredoka, sans-serif; font-size: 2.6em; color: var(--gold); }
+  .tvcount .n { font-family: Fredoka, sans-serif; font-size: 9em; font-weight: 700; line-height: 1; animation: pulse 1s ease-in-out infinite; }
+
+  /* TV play (question + reveal) */
+  .tvplay { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 2em; height: 100%; align-items: center; }
+  .globewrap { position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 100%; margin: 0 auto; }
+  .globewrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 1.2em; }
+  .tvpanel { display: flex; flex-direction: column; align-items: center; gap: 1em; min-width: 0; }
+  .qtitle { font-family: Fredoka, sans-serif; font-size: 1.6em; color: var(--gold); }
+  .qprompt { font-size: 1.3em; font-weight: 800; }
+  .ring { position: relative; width: 9.5em; height: 9.5em; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: Fredoka, sans-serif; font-size: 3.6em; font-weight: 700; }
+  .lockrow { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6em; max-width: 100%; }
+  .lockrow .who { display: flex; flex-direction: column; align-items: center; gap: 0.2em; opacity: 0.4; transition: opacity 0.3s, transform 0.3s; }
+  .lockrow .who.in { opacity: 1; transform: scale(1.05); }
+  .lockrow .who .av { border: 0.18em solid transparent; }
+  .lockrow .who.in .av { border-color: var(--gold); }
+  .lockrow .who span { font-size: 0.8em; font-weight: 800; max-width: 6em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* reveal */
+  .suspense { font-family: Fredoka, sans-serif; font-size: 2.2em; text-align: center; }
+  .answerhead { font-family: Fredoka, sans-serif; font-size: 2.4em; font-weight: 700; text-align: center; animation: popIn 0.5s cubic-bezier(.2,1.6,.4,1); }
+  .answerhead span { color: #4ade80; }
+  .bars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1em; width: 100%; height: 18em; align-items: end; }
+  .bar { display: flex; flex-direction: column; align-items: center; gap: 0.35em; height: 100%; justify-content: flex-end; transition: opacity 0.5s; }
+  .bar .stack { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.2em; max-width: 100%; }
+  .bar .cnt { font-family: Fredoka, sans-serif; font-size: 1.8em; font-weight: 700; }
+  .bar .col { width: 100%; border-radius: 0.7em 0.7em 0 0; height: 0.4em; transition: height 0.9s cubic-bezier(.2,1.1,.4,1); }
+  .bar .foot { width: 100%; border-radius: 0 0 0.7em 0.7em; padding: 0.5em 0.2em; text-align: center; font-family: Fredoka, sans-serif; font-weight: 700; font-size: 1.05em; display: flex; justify-content: center; align-items: center; gap: 0.35em; line-height: 1.1; }
+  .bar.right .col { box-shadow: 0 0 0 0.25em #4ade80; }
+  .bar.dim { opacity: 0.3; }
+  .cards { display: flex; flex-wrap: wrap; gap: 0.8em; justify-content: center; width: 100%; }
+  .acard { background: rgba(255,255,255,0.1); border: 0.15em solid rgba(255,255,255,0.2); border-radius: 1em; padding: 0.7em 1em; display: flex; flex-direction: column; align-items: center; gap: 0.4em; animation: rise 0.45s ease both; transition: opacity 0.5s, background 0.5s, border-color 0.5s; min-width: 8em; }
+  .acard b { font-size: 1.15em; }
+  .acard.right { background: rgba(47,158,88,0.45); border-color: #4ade80; }
+  .acard.dim { opacity: 0.35; }
+  .fastest { font-weight: 800; color: #4ade80; font-size: 1.05em; min-height: 1.3em; text-align: center; }
+
+  /* leaderboard */
+  .tvboard { align-items: center; }
+  .boardtitle { font-family: Fredoka, sans-serif; font-size: 2.4em; margin-bottom: 0.5em; }
+  .board { position: relative; width: min(46em, 100%); }
+  .brow { position: absolute; left: 0; right: 0; height: 3.3em; display: flex; align-items: center; gap: 0.8em; background: rgba(255,255,255,0.09); border-radius: 0.9em; padding: 0 1em; transition: top 0.9s cubic-bezier(.3,1.2,.4,1); }
+  .brow .rk { width: 1.6em; font-family: Fredoka, sans-serif; font-size: 1.4em; font-weight: 700; color: var(--gold); }
+  .brow .nm { flex: 1; font-weight: 800; font-size: 1.2em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .brow .sc { font-family: Fredoka, sans-serif; font-size: 1.35em; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .brow .delta { font-size: 0.85em; font-weight: 800; color: #4ade80; width: 4.5em; text-align: right; }
+  .brow.first { background: rgba(255,213,107,0.22); }
+  .callout { margin-top: 1em; font-size: 1.3em; font-weight: 800; color: var(--gold); min-height: 1.5em; text-align: center; animation: popIn 0.5s ease both; animation-delay: 1.4s; }
+
+  /* podium */
+  .tvpodium { align-items: center; justify-content: flex-end; padding-bottom: 0; }
+  .podtitle { font-family: Fredoka, sans-serif; font-size: 3em; font-weight: 700; text-align: center; min-height: 1.2em; }
+  .podsub { color: var(--tvmuted); font-weight: 700; text-align: center; margin-bottom: auto; min-height: 1.3em; }
+  .pods { display: flex; align-items: flex-end; justify-content: center; gap: 1.2em; }
+  .pod { width: 12em; display: flex; flex-direction: column; align-items: center; gap: 0.4em; opacity: 0; transform: translateY(2em); transition: opacity 0.6s, transform 0.6s cubic-bezier(.2,1.4,.4,1); }
+  .pod.show { opacity: 1; transform: none; }
+  .pod .nm { font-weight: 800; font-size: 1.3em; text-align: center; }
+  .pod .pts { color: var(--gold); font-weight: 800; }
+  .pod .block { width: 100%; border-radius: 1em 1em 0 0; display: flex; justify-content: center; padding-top: 0.3em; font-family: Fredoka, sans-serif; font-weight: 700; color: #231300; }
+  .pod .block span { font-size: 3em; line-height: 1; }
+  .others { display: flex; gap: 1em; flex-wrap: wrap; justify-content: center; color: var(--tvmuted); font-weight: 700; margin: 0.6em 0; min-height: 1.4em; }
+  .podbtns { display: flex; gap: 1em; justify-content: center; padding: 1em 0 1.4em; }
+
+  /* ---------- PHONE ---------- */
+  #v-ph { min-height: 100vh; }
+  .phbar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  .phbar .me { flex: 1; min-width: 0; }
+  .phbar .me b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .phbar .me span { font-size: 0.82rem; color: var(--muted); font-weight: 700; }
+  .phbar .pill { background: var(--ink); color: #fff; border-radius: 20px; padding: 6px 12px; font-family: Fredoka, sans-serif; font-weight: 700; }
+  .hostbar { display: flex; gap: 8px; padding: 8px 14px; background: #fff7e0; border-bottom: 1px solid #f1dfa6; font-size: 0.85rem; font-weight: 700; align-items: center; }
+  .hostbar .sp { flex: 1; }
+  .hostbar button { border: 1px solid #d8c27a; background: #fff; border-radius: 10px; padding: 6px 10px; font-weight: 800; font-size: 0.82rem; }
+  .phscreen { flex-direction: column; padding: 16px; gap: 14px; min-height: calc(100vh - 66px); }
+  .center { align-items: center; justify-content: center; text-align: center; }
+  .bigav { animation: popIn 0.5s cubic-bezier(.2,1.5,.4,1); }
+  .phlist { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .phlist .chip { display: flex; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 30px; padding: 4px 10px 4px 4px; font-weight: 800; font-size: 0.9rem; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .phglobe { width: min(100%, 46vh); margin: 0 auto; }
+  .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; flex: 1; min-height: 220px; }
+  .opt { border: none; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-family: Fredoka, sans-serif; font-size: 1.35rem; font-weight: 700; box-shadow: 0 6px 0 rgba(0,0,0,0.2); padding: 10px; line-height: 1.1; }
+  .opt:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
+  .opt svg { width: 34px; height: 34px; }
+  .opts.compact .opt { flex-direction: row; font-size: 1.1rem; gap: 8px; }
+  .opts.compact .opt svg { width: 22px; height: 22px; }
+  .timerpill { align-self: center; background: var(--ink); color: var(--gold); font-family: Fredoka, sans-serif; font-weight: 700; font-size: 1.2rem; border-radius: 30px; padding: 4px 16px; }
+  .picker { position: relative; }
+  .prow { display: flex; gap: 8px; }
+  .prow input { flex: 1; min-width: 0; }
+  .suggest { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 40; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow-y: auto; box-shadow: 0 10px 24px rgba(0,0,0,0.14); display: none; max-height: 280px; }
+  .suggest.up { top: auto; bottom: calc(100% + 4px); }
+  .suggest.show { display: block; }
+  .suggest button { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid var(--line); padding: 12px 14px; font-size: 1rem; color: var(--ink); }
+  .suggest button.hl { background: #fff1ec; }
+  .suggest .alias { font-size: 0.75rem; color: var(--muted); }
+  .suggest .head { position: sticky; top: 0; background: var(--panel2); font-size: 0.72rem; font-weight: 800; color: var(--muted); padding: 6px 14px; border-bottom: 1px solid var(--line); }
+  .locked { font-family: Fredoka, sans-serif; font-size: 1.9rem; font-weight: 700; }
+  .resultfull { width: 100%; flex: 1; min-height: 70vh; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: #fff; animation: popIn 0.4s ease; }
+  .resultfull.ok { background: linear-gradient(180deg, #2f9e58, #1d7a42); }
+  .resultfull.no { background: linear-gradient(180deg, #d64545, #a32020); }
+  .resultfull.none { background: linear-gradient(180deg, #5b6474, #394150); }
+  .resultfull .head { font-family: Fredoka, sans-serif; font-size: 2.6rem; font-weight: 700; }
+  .resultfull .pts { font-family: Fredoka, sans-serif; font-size: 3.6rem; font-weight: 700; color: #ffe08a; line-height: 1; }
+  .resultfull .streak { background: rgba(0,0,0,0.22); border-radius: 30px; padding: 8px 16px; font-weight: 800; }
+  .resultfull .rank { background: #fff; color: var(--ink); border-radius: 18px; padding: 14px 20px; margin-top: 10px; min-width: 70%; }
+  .resultfull .rank b { font-family: Fredoka, sans-serif; font-size: 1.8rem; display: block; }
+  .resultfull .mini { width: 100%; max-width: 360px; background: rgba(255,255,255,0.14); border-radius: 14px; padding: 10px; font-size: 0.9rem; font-weight: 700; text-align: left; }
+  .resultfull .mini div { display: flex; justify-content: space-between; padding: 2px 4px; }
+  .lb { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .lb .r { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-weight: 800; }
+  .lb .r.me { border-color: var(--accent); background: #fff1ec; }
+  .lb .r .k { width: 22px; color: var(--muted); }
+  .lb .r .n { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .place { font-family: Fredoka, sans-serif; font-size: 3.4rem; font-weight: 700; line-height: 1; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<canvas id="fx"></canvas>
+
+<!-- ===================== HOME ===================== -->
+<div class="view on" id="v-home">
+  <div class="wrap">
+    <div class="brand">Globle <span>Party</span></div>
+    <p class="tagline">The world quiz for your whole crew</p>
+    <div id="rejoinBox"></div>
+    <button class="bigchoice" onclick="startHost('tv')">
+      <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e4572e" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+      <div><b>Host on this screen</b><span>Use this laptop or TV as the big shared screen. Everyone, including you, plays on their phone.</span></div>
+    </button>
+    <button class="bigchoice" onclick="startHost('phones')">
+      <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e4572e" stroke-width="2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+      <div><b>Host from my phone (no TV)</b><span>Every phone shows the globe. You run the game and play at the same time.</span></div>
+    </button>
+    <button class="bigchoice" onclick="showJoin()">
+      <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e4572e" stroke-width="2" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div>
+      <div><b>Join a game</b><span>Got a room code? Jump in.</span></div>
+    </button>
+    <p class="err" id="homeErr"></p>
+  </div>
+</div>
+
+<!-- ===================== JOIN / PROFILE ===================== -->
+<div class="view" id="v-join">
+  <div class="wrap">
+    <div class="brand" style="font-size:1.8rem">Globle <span>Party</span></div>
+    <div id="codeBlock">
+      <div class="lbl"><label for="joinCode">Room code</label></div>
+      <input class="text code" id="joinCode" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="lbl"><label for="joinName">Your name</label></div>
+    <input class="text" id="joinName" maxlength="12" autocomplete="off" placeholder="e.g. Sam">
+    <div class="lbl">Pick your avatar</div>
+    <div class="emojis" id="emojiPick"></div>
+    <div class="lbl">Colour</div>
+    <div class="colors" id="colorPick"></div>
+    <div class="preview" id="joinPreview"></div>
+    <button class="btn" id="joinBtn" onclick="submitProfile()">Join game</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="goHome()">Back</button>
+    <p class="err" id="joinErr"></p>
+  </div>
+</div>
+
+<!-- ===================== TV ===================== -->
+<div class="view" id="v-tv">
+  <div class="tvbar">
+    <div class="t">Globle <span>Party</span></div>
+    <div class="chip" id="tvCodeChip"></div>
+    <div class="chip hidden" id="tvQChip"></div>
+    <div class="sp"></div>
+    <button class="tvbtn hidden" id="tvSkip" onclick="brainSkip()">Skip ▶</button>
+    <button class="tvbtn" onclick="endGame()">End game</button>
+  </div>
+
+  <div class="sub tvscreen" id="tvLobby">
+    <div class="tvlobby">
+      <div class="joincard">
+        <div class="tvmuted">Join on your phone</div>
+        <div class="url" id="tvUrl"></div>
+        <div class="qr" id="tvQr"></div>
+        <div class="tvmuted">Room code</div>
+        <div class="roomcode" id="tvCode"></div>
+      </div>
+      <div class="lobbyright">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div class="fred" style="font-size:1.8em;font-weight:600">Players <span style="color:var(--gold)" id="tvCount"></span></div>
+          <div class="tvmuted" style="font-size:0.85em">You host here, then join on your phone to play too</div>
+        </div>
+        <div class="pgrid" id="tvPlayers"></div>
+        <div style="margin-top:auto" class="settings" id="tvSettings"></div>
+        <button class="btn gold" id="tvStart" onclick="brainStart()" style="font-size:1.2em">Start Quiz Show</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub tvscreen tvcount" id="tvCountdown">
+    <div class="q" id="tvCountQ"></div>
+    <div class="tvmuted" style="font-size:1.4em">Get ready…</div>
+    <div class="n" id="tvCountN">3</div>
+  </div>
+
+  <div class="sub tvscreen" id="tvPlay">
+    <div class="tvplay">
+      <div class="globewrap" id="tvGlobe"></div>
+      <div class="tvpanel" id="tvPanel"></div>
+    </div>
+  </div>
+
+  <div class="sub tvscreen tvboard" id="tvBoard"></div>
+  <div class="sub tvscreen tvpodium" id="tvPodium"></div>
+</div>
+
+<!-- ===================== PHONE ===================== -->
+<div class="view" id="v-ph">
+  <div class="phbar">
+    <div id="phAv"></div>
+    <div class="me"><b id="phName"></b><span id="phScore"></span></div>
+    <div class="pill" id="phPill"></div>
+  </div>
+  <div class="hostbar hidden" id="phHostBar">
+    <span>👑 You're the host</span><div class="sp"></div>
+    <button id="phSkip" onclick="brainSkip()">Skip ▶</button>
+    <button onclick="endGame()">End game</button>
+  </div>
+
+  <div class="sub phscreen" id="phLobby"></div>
+  <div class="sub phscreen center" id="phCountdown"></div>
+  <div class="sub phscreen" id="phQuestion">
+    <div class="globewrap phglobe hidden" id="phGlobe"></div>
+    <div class="timerpill" id="phTimer"></div>
+    <div id="phAnswerArea" style="display:flex;flex-direction:column;flex:1;gap:12px"></div>
+  </div>
+  <div class="sub phscreen center" id="phWait"></div>
+  <div class="sub phscreen center" id="phReveal"></div>
+  <div class="sub phscreen" id="phBoard"></div>
+  <div class="sub phscreen center" id="phPodium"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="globle-data.js"></script>
+<script>
+// ====== PASTE YOUR FIREBASE CONFIG HERE ======
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+// ==============================================
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const TS = firebase.database.ServerValue.TIMESTAMP;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function load(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+let toastT = null;
+function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2400); }
+
+// ---------- timing (Firebase's clock, so slow phones aren't penalised) ----------
+let clockOffset = 0;
+db.ref(".info/serverTimeOffset").on("value", s => { clockOffset = s.val() || 0; });
+const serverNow = () => Date.now() + clockOffset;
+
+// ---------- constants ----------
+const COUNT_MS = 3500, SUSPENSE_MS = 1800, CORRECT_AT = 3300, REVEAL_MS = 8500, BOARD_MS = 6000;
+const EMOJIS = ["🦘", "🐨", "🦊", "🐼", "🦁", "🐙", "🐸", "🦉", "🐧", "🐯", "🦄", "🐢", "🐶", "🐱", "🐵", "🦖"];
+const COLORS = ["#e4572e", "#7b5ea7", "#e0a92c", "#3fa7d6", "#2f9e58", "#ff7aa2", "#1d2433", "#14b8a6"];
+const OPT = [
+  { bg: "var(--a0)", fg: "#fff", shape: "M22 4 L40 38 L4 38 Z" },
+  { bg: "var(--a1)", fg: "#fff", shape: "M22 3 L41 22 L22 41 L3 22 Z" },
+  { bg: "var(--a2)", fg: "#231300", shape: "M22 4 A18 18 0 1 1 21.9 4 Z" },
+  { bg: "var(--a3)", fg: "#fff", shape: "M6 6 L38 6 L38 38 L6 38 Z" }
+];
+const shapeSvg = (k, cls = "") => `<svg class="${cls}" viewBox="0 0 44 44" aria-hidden="true"><path d="${OPT[k].shape}" fill="${OPT[k].fg}"/></svg>`;
+
+// =====================================================================
+// COUNTRY DATA
+// =====================================================================
+const DATA = window.GLOBLE_DATA;
+const C = DATA.countries, N_C = C.length;
+const idxOf = {}; C.forEach((c, i) => idxOf[c.iso] = i);
+const nameOf = iso => iso && idxOf[iso] !== undefined ? C[idxOf[iso]].name : "—";
+function distKm(a, b) {
+  let i = idxOf[a], j = idxOf[b];
+  if (i === j) return 0;
+  if (i > j) [i, j] = [j, i];
+  return DATA.dist[i * N_C - i * (i + 1) / 2 + (j - i - 1)];
+}
+function prepFeatures(topo, useExtra) {
+  const feats = topojson.feature(topo, topo.objects[Object.keys(topo.objects)[0]]).features;
+  if (useExtra) feats.forEach(f => { if (DATA.extra[f.properties.iso]) f.geometry = DATA.extra[f.properties.iso]; });
+  const out = feats.filter(f => f.geometry);
+  out.forEach(f => {
+    const g = f.geometry, polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+    polys.forEach(p => { if (d3.geoArea({ type: "Polygon", coordinates: p }) > 2 * Math.PI) p.forEach(r => r.reverse()); });
+    f.key = f.properties.kind === "c" ? f.properties.iso : "o:" + f.properties.name;
+    f.isC = f.properties.kind === "c";
+    f.cen = d3.geoCentroid(f);
+    let r = 0; polys.forEach(p => p[0].forEach(pt => { const d = d3.geoDistance(f.cen, pt); if (d > r) r = d; }));
+    f.rad = r;
+  });
+  return out;
+}
+const FEAT_HI = prepFeatures(DATA.topo, true);
+const FEAT_MID = prepFeatures(DATA.topoMid, false);
+const FEAT_LO = prepFeatures(DATA.topoLo, false);
+const mainPoly = {};
+FEAT_HI.forEach(f => {
+  if (!f.isC) return;
+  const g = f.geometry, polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  let best = null, ba = -1;
+  polys.forEach(p => { const a = d3.geoArea({ type: "Polygon", coordinates: p }); if (a > ba) { ba = a; best = p; } });
+  mainPoly[f.key] = { type: "Feature", geometry: { type: "Polygon", coordinates: best } };
+});
+
+// =====================================================================
+// GLOBE (display only: flies to the question's country)
+// =====================================================================
+function makeGlobe(wrap) {
+  const base = document.createElement("canvas"), fxc = document.createElement("canvas");
+  wrap.appendChild(base); wrap.appendChild(fxc);
+  const ctx = base.getContext("2d"), fctx = fxc.getContext("2d");
+  const proj = d3.geoOrthographic().clipAngle(90).precision(0.8), path = d3.geoPath(proj, ctx);
+  const GRAT = d3.geoGraticule10();
+  let size = 300, dpr = 1, center = [20, 10], zoom = 1, flight = null, moving = false, settle = null, dirty = true, req = false;
+  let styles = new Map(), ring = null, ringColor = "124,58,237", idleSpin = false;
+  const LAND = "#c9cdd3", OTHER = "#dde0e4";
+  const NEUTRAL = { fill: LAND, stroke: "rgba(255,255,255,0.95)", lw: 0.6 }, OTH = { fill: OTHER, stroke: "rgba(255,255,255,0.95)", lw: 0.6 };
+  const baseR = () => size / 2 - 6;
+  function setProj() { proj.scale(baseR() * zoom).translate([size / 2, size / 2]).rotate([-center[0], -center[1], 0]); }
+  function resize() {
+    const w = Math.round(wrap.clientWidth); if (!w) return;
+    size = w; dpr = Math.min(window.devicePixelRatio || 1, 2);
+    base.width = fxc.width = size * dpr; base.height = fxc.height = size * dpr;
+    dirty = true; request();
+  }
+  function request() { if (!req) { req = true; requestAnimationFrame(tick); } }
+  function markMoving() { moving = true; dirty = true; clearTimeout(settle); settle = setTimeout(() => { moving = false; dirty = true; request(); }, 150); }
+  function viewLimit() { return Math.asin(Math.min(1, size * 0.72 / (baseR() * zoom))); }
+  function drawBase() {
+    setProj();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, size, size);
+    const R = baseR() * zoom, c = size / 2;
+    const g = ctx.createRadialGradient(c - R * 0.35, c - R * 0.4, R * 0.05, c, c, R);
+    g.addColorStop(0, "#f1f9ff"); g.addColorStop(1, "#a8d0ea");
+    ctx.beginPath(); path({ type: "Sphere" }); ctx.fillStyle = g; ctx.fill();
+    if (!moving) { ctx.beginPath(); path(GRAT); ctx.strokeStyle = "rgba(50,100,140,0.12)"; ctx.lineWidth = 0.7; ctx.stroke(); }
+    const lim = Math.min(Math.PI / 2, viewLimit()) + 0.02;
+    const feats = moving ? FEAT_LO : zoom < 2.2 ? FEAT_MID : FEAT_HI;
+    const groups = new Map([[NEUTRAL, []], [OTH, []]]);
+    for (const f of feats) {
+      if (d3.geoDistance(f.cen, center) - f.rad > lim) continue;
+      const st = f.isC ? (styles.get(f.key) || NEUTRAL) : OTH;
+      let a = groups.get(st); if (!a) { a = []; groups.set(st, a); } a.push(f);
+    }
+    groups.forEach((list, st) => { if (!list.length) return; ctx.beginPath(); list.forEach(f => path(f)); ctx.fillStyle = st.fill; ctx.fill(); ctx.strokeStyle = st.stroke; ctx.lineWidth = st.lw; ctx.stroke(); });
+    ctx.beginPath(); path({ type: "Sphere" }); ctx.strokeStyle = "rgba(40,80,110,0.35)"; ctx.lineWidth = 1.2; ctx.stroke();
+  }
+  function drawFx(now) {
+    setProj();
+    fctx.setTransform(dpr, 0, 0, dpr, 0, 0); fctx.clearRect(0, 0, size, size);
+    if (!ring || d3.geoDistance(ring, center) > Math.PI / 2 - 0.05) return;
+    const p = proj(ring); if (!p) return;
+    const t = (now / 1100) % 1;
+    fctx.beginPath(); fctx.arc(p[0], p[1], 9 + t * 26, 0, Math.PI * 2); fctx.strokeStyle = `rgba(${ringColor},${1 - t})`; fctx.lineWidth = 3; fctx.stroke();
+    fctx.beginPath(); fctx.arc(p[0], p[1], 9, 0, Math.PI * 2); fctx.strokeStyle = `rgba(${ringColor},0.9)`; fctx.lineWidth = 2.5; fctx.stroke();
+  }
+  function tick(now) {
+    req = false;
+    if (!wrap.offsetParent) return;
+    let more = false;
+    if (flight) { if (flight(now)) more = true; else flight = null; markMoving(); }
+    if (idleSpin && !flight) { center[0] += 0.12; markMoving(); more = true; }
+    if (dirty) { drawBase(); dirty = false; }
+    drawFx(now);
+    if (more || ring) request();
+  }
+  function flyTo(lp, z, dur = 1300) {
+    idleSpin = false;
+    const from = center.slice(), interp = d3.geoInterpolate(from, lp), z0 = zoom, far = d3.geoDistance(from, lp) > 0.45, zDip = Math.min(z0, z, 1.3), t0 = performance.now();
+    flight = now => {
+      const t = Math.min(1, (now - t0) / dur), e = d3.easeCubicInOut(t);
+      center = interp(e);
+      zoom = far && (z0 > 1.5 || z > 1.5) ? (t < 0.5 ? z0 + (zDip - z0) * d3.easeCubicInOut(t * 2) : zDip + (z - zDip) * d3.easeCubicInOut(t * 2 - 1)) : z0 + (z - z0) * e;
+      return t < 1;
+    };
+    request();
+  }
+  function zoomFor(iso) {
+    const c = C[idxOf[iso]];
+    if (c.tiny) return 4;
+    const p = d3.geoOrthographic().clipAngle(90).rotate([-c.lp[0], -c.lp[1]]).fitExtent([[0, 0], [size, size]], mainPoly[iso]);
+    return Math.max(1, Math.min(6, p.scale() * 0.32 / baseR()));
+  }
+  // show a country: purple while asking, green once revealed
+  function show(iso, revealed) {
+    styles = new Map();
+    if (iso) styles.set(iso, { fill: revealed ? "#2f9e58" : "#7c3aed", stroke: "#1d2433", lw: 1.4 });
+    ring = iso && C[idxOf[iso]].tiny ? C[idxOf[iso]].lp : null;
+    ringColor = revealed ? "47,158,88" : "124,58,237";
+    dirty = true; request();
+  }
+  function spin() { styles = new Map(); ring = null; idleSpin = true; zoom = 1; dirty = true; request(); }
+  return { resize, flyTo, zoomFor, show, spin, goTo: iso => flyTo(C[idxOf[iso]].lp, zoomFor(iso)) };
+}
+
+// =====================================================================
+// SEARCH + PICKER (typing answers)
+// =====================================================================
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+const SEARCH = C.map(c => [{ k: norm(c.name), label: c.name, isName: true }].concat(c.alias.map(a => ({ k: norm(a), label: a, isName: false }))));
+const ALPHA = C.map((c, i) => i).sort((a, b) => C[a].name.localeCompare(C[b].name));
+function suggest(q, limit = 8) {
+  const n = norm(q); if (!n) return [];
+  const res = [];
+  C.forEach((c, i) => {
+    let best = null;
+    SEARCH[i].forEach(s => {
+      let sc = s.k === n ? 0 : s.k.startsWith(n) ? 1 : (" " + s.k).includes(" " + n) ? 2 : (n.length >= 3 && s.k.includes(n)) ? 3 : -1;
+      if (sc < 0) return; if (!s.isName) sc += 0.5;
+      if (!best || sc < best.score) best = { score: sc, alias: s.isName ? null : s.label };
+    });
+    if (best) res.push({ i, score: best.score, alias: best.alias });
+  });
+  res.sort((a, b) => a.score - b.score || C[a.i].name.localeCompare(C[b.i].name));
+  return res.slice(0, limit);
+}
+function makePicker(input, box, onPick) {
+  let items = [], hl = -1, open = false;
+  const wrap = input.closest(".picker");
+  const build = () => { items = norm(input.value) ? suggest(input.value) : ALPHA.map(i => ({ i })); if (hl >= items.length) hl = -1; };
+  function place() {
+    const vvH = window.visualViewport ? window.visualViewport.height + window.visualViewport.offsetTop : window.innerHeight;
+    const r = input.getBoundingClientRect(), below = vvH - r.bottom - 12, above = r.top - 12;
+    const up = below < 220 && above > below;
+    box.classList.toggle("up", up);
+    box.style.maxHeight = Math.max(140, Math.min(280, up ? above : below)) + "px";
+  }
+  function paint() {
+    if (!open || !items.length) { box.classList.remove("show"); return; }
+    box.innerHTML = (norm(input.value) ? "" : `<div class="head">ALL 195 COUNTRIES · OR START TYPING</div>`) +
+      items.map((s, k) => `<button data-k="${k}" class="${k === hl ? "hl" : ""}">${esc(C[s.i].name)}${s.alias ? ` <span class="alias">(${esc(s.alias)})</span>` : ""}</button>`).join("");
+    place(); box.classList.add("show");
+  }
+  const show = () => { open = true; build(); paint(); };
+  const close = () => { open = false; box.classList.remove("show"); hl = -1; };
+  const finish = iso => { input.value = ""; close(); input.blur(); onPick(iso); };
+  function enter() {
+    if (hl >= 0 && items[hl]) return finish(C[items[hl].i].iso);
+    if (!norm(input.value)) return;
+    const s = suggest(input.value)[0];
+    if (!s) return toast("🤔 Not a country I know");
+    finish(C[s.i].iso);
+  }
+  input.addEventListener("focus", () => { hl = -1; show(); });
+  input.addEventListener("input", () => { hl = -1; show(); });
+  input.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { if (!open) show(); if (items.length) hl = (hl + 1) % items.length; paint(); e.preventDefault(); }
+    else if (e.key === "ArrowUp" && items.length) { hl = (hl - 1 + items.length) % items.length; paint(); e.preventDefault(); }
+    else if (e.key === "Enter") { e.preventDefault(); enter(); }
+    else if (e.key === "Escape") close();
+  });
+  box.addEventListener("pointerdown", e => e.preventDefault());
+  box.addEventListener("click", e => { const b = e.target.closest("button[data-k]"); if (b && items[+b.dataset.k]) finish(C[items[+b.dataset.k].i].iso); });
+  document.addEventListener("pointerdown", e => { if (open && !wrap.contains(e.target)) close(); });
+  return { enter, close };
+}
+
+// three wrong options: two near neighbours plus one from the same continent
+function makeOptions(t) {
+  const near = C.filter(c => c.iso !== t).map(c => ({ iso: c.iso, d: distKm(c.iso, t) })).sort((a, b) => a.d - b.d).slice(0, 14);
+  const picks = shuffle(near.slice()).slice(0, 2).map(x => x.iso);
+  const cont = C[idxOf[t]].cont;
+  const pool = shuffle(C.filter(c => c.iso !== t && !picks.includes(c.iso) && c.cont === cont).map(c => c.iso));
+  picks.push(pool[0] || shuffle(C.filter(c => c.iso !== t && !picks.includes(c.iso)).map(c => c.iso))[0]);
+  return shuffle([t, ...picks]);
+}
+
+// =====================================================================
+// SESSION
+// =====================================================================
+let uid = null, code = null, room = null, roomRef = null;
+let role = null;          // "tv" | "player"
+let isBrain = false;      // the device that runs timers + scoring (TV, or the host's phone)
+let hostingMode = null;   // when creating: "tv" | "phones"
+let lastKey = null;
+let tvGlobe = null, phGlobe = null;
+
+auth.onAuthStateChanged(u => { if (u) { uid = u.uid; checkRejoin(); } });
+auth.signInAnonymously().catch(e => { $("homeErr").textContent = "Connection error: " + e.message; });
+
+function showView(id) { document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === id)); document.body.classList.toggle("tvmode", id === "v-tv"); }
+function showSub(parentId, subId) { $(parentId).querySelectorAll(":scope > .sub").forEach(s => s.classList.toggle("on", s.id === subId)); }
+
+// prefill from a QR scan (?room=ABCD)
+const urlRoom = (new URLSearchParams(location.search).get("room") || "").toUpperCase().slice(0, 4);
+
+function checkRejoin() {
+  const last = load("globleparty.last");
+  if (urlRoom && !(last && last.code === urlRoom)) { showJoin(urlRoom); return; }
+  if (!last || !last.code) return;
+  db.ref("rooms/" + last.code).once("value").then(s => {
+    const r = s.val();
+    if (!r) { store("globleparty.last", null); if (urlRoom) showJoin(urlRoom); return; }
+    const mine = r.hostUid === uid || (r.players && r.players[uid]);
+    if (!mine) { if (urlRoom) showJoin(urlRoom); return; }
+    $("rejoinBox").innerHTML = `<div class="rejoin"><div>You were in room <b>${esc(last.code)}</b>.</div><button class="btn small" onclick="rejoin()">Rejoin</button></div>`;
+    window.__rejoin = { code: last.code, role: last.role };
+    if (urlRoom === last.code) rejoin();
+  });
+}
+function rejoin() {
+  const r = window.__rejoin; if (!r) return;
+  enterRoom(r.code, r.role);
+}
+
+// ---------- profile picker (join + host-from-phone) ----------
+let pick = { emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)], color: COLORS[Math.floor(Math.random() * COLORS.length)] };
+const avatar = (p, px) => `<span class="av" style="width:${px}px;height:${px}px;background:${p.color};font-size:${Math.round(px * 0.56)}px">${esc(p.emoji)}</span>`;
+const avatarEm = (p, em) => `<span class="av" style="width:${em}em;height:${em}em;background:${p.color};font-size:1em"><span style="font-size:${(em * 0.56).toFixed(2)}em">${esc(p.emoji)}</span></span>`;
+function renderPick() {
+  $("emojiPick").innerHTML = EMOJIS.map(e => `<button class="${e === pick.emoji ? "sel" : ""}" onclick="pick.emoji='${e}';renderPick()" aria-label="avatar ${e}">${e}</button>`).join("");
+  $("colorPick").innerHTML = COLORS.map(c => `<button class="${c === pick.color ? "sel" : ""}" style="background:${c}" onclick="pick.color='${c}';renderPick()" aria-label="colour ${c}"></button>`).join("");
+  const nm = $("joinName").value.trim() || "You";
+  $("joinPreview").innerHTML = avatar(pick, 56) + `<span>${esc(nm)}</span>`;
+}
+$("joinName").addEventListener("input", renderPick);
+$("joinCode").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, ""); });
+function showJoin(prefill) {
+  hostingMode = null;
+  $("codeBlock").classList.remove("hidden");
+  $("joinBtn").textContent = "Join game";
+  if (prefill) $("joinCode").value = prefill;
+  const prof = load("globleparty.profile"); if (prof) { $("joinName").value = prof.name || ""; pick.emoji = prof.emoji || pick.emoji; pick.color = prof.color || pick.color; }
+  renderPick(); $("joinErr").textContent = "";
+  showView("v-join");
+}
+function goHome() { location.href = location.pathname; }
+
+function startHost(mode) {
+  if (!uid) return toast("Still connecting… try again in a second");
+  if (mode === "tv") return createRoom("tv");
+  showJoin();
+  hostingMode = "phones";
+  $("codeBlock").classList.add("hidden");
+  $("joinBtn").textContent = "Create game";
+}
+
+function genCode() { const L = "ABCDEFGHJKMNPQRSTUVWXYZ"; let s = ""; for (let i = 0; i < 4; i++) s += L[Math.floor(Math.random() * L.length)]; return s; }
+
+async function createRoom(mode, profile) {
+  let c = genCode();
+  for (let i = 0; i < 6; i++) { const s = await db.ref("rooms/" + c + "/hostUid").once("value"); if (!s.exists()) break; c = genCode(); }
+  const data = { hostUid: uid, mode, createdAt: TS, settings: { answers: "choice", rounds: 10, timer: 20 }, state: { phase: "lobby" } };
+  if (profile) data.players = { [uid]: Object.assign({ score: 0, streak: 0, online: true, joinedAt: TS }, profile) };
+  await db.ref("rooms/" + c).set(data);
+  enterRoom(c, mode === "tv" ? "tv" : "player");
+}
+
+async function submitProfile() {
+  const name = $("joinName").value.trim();
+  if (!name) { $("joinErr").textContent = "Enter your name"; return; }
+  const profile = { name, emoji: pick.emoji, color: pick.color };
+  store("globleparty.profile", profile);
+  if (hostingMode === "phones") return createRoom("phones", profile);
+  const c = $("joinCode").value.trim().toUpperCase();
+  if (c.length !== 4) { $("joinErr").textContent = "Enter the 4-letter room code"; return; }
+  const s = await db.ref("rooms/" + c).once("value");
+  const r = s.val();
+  if (!r) { $("joinErr").textContent = "No game found with that code"; return; }
+  const existing = r.players && r.players[uid];
+  const upd = existing ? Object.assign({}, profile, { online: true }) : Object.assign({ score: 0, streak: 0, online: true, joinedAt: TS }, profile);
+  await db.ref(`rooms/${c}/players/${uid}`).update(upd);
+  enterRoom(c, "player");
+}
+
+function enterRoom(c, r) {
+  code = c; role = r; lastKey = null;
+  roomRef = db.ref("rooms/" + code);
+  store("globleparty.last", { code, role });
+  if (role === "player") {
+    // presence: mark me offline if my connection drops
+    db.ref(".info/connected").on("value", s => {
+      if (!s.val() || !code) return;
+      const me = db.ref(`rooms/${code}/players/${uid}/online`);
+      me.onDisconnect().set(false); me.set(true);
+    });
+  }
+  roomRef.on("value", s => {
+    room = s.val();
+    if (!room) return roomGone();
+    isBrain = room.hostUid === uid;
+    render();
+    if (isBrain) { brainSchedule(); keepAwake(); }
+  });
+}
+function roomGone() {
+  if (roomRef) roomRef.off();
+  store("globleparty.last", null);
+  alert("This game has ended.");
+  goHome();
+}
+function endGame() {
+  if (!isBrain) return;
+  if (!confirm("End the game for everyone?")) return;
+  roomRef.off(); store("globleparty.last", null);
+  roomRef.remove().finally(goHome);
+}
+
+// keep the running device's screen awake so timers don't stall
+let wakeLock = null;
+async function keepAwake() {
+  if (wakeLock || !("wakeLock" in navigator)) return;
+  try { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && isBrain) keepAwake(); });
+
+// ---------- room helpers ----------
+const players = () => room.players || {};
+const playerList = () => Object.entries(players()).map(([id, p]) => Object.assign({ id }, p)).sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+const ranked = () => playerList().sort((a, b) => (b.score || 0) - (a.score || 0) || (a.joinedAt || 0) - (b.joinedAt || 0));
+const qData = q => (room.questions || [])[q];
+const answersFor = q => (room.answers && room.answers[q]) || {};
+const resultsFor = q => (room.results && room.results[q]) || {};
+const totalQ = () => (room.questions || []).length || room.settings.rounds;
+const sizeClass = n => n <= 6 ? "l" : n <= 12 ? "m" : "s";
+const ordinal = n => n + (["th", "st", "nd", "rd"][(n % 100 - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
+
+// =====================================================================
+// BRAIN (runs on the TV, or on the host's phone in no-TV mode)
+// =====================================================================
+let brainTimer = null, brainAction = null;
+const finished = {};
+
+function setSetting(k, v) { if (isBrain && room.state.phase === "lobby") roomRef.child("settings/" + k).set(v); }
+
+function brainStart() {
+  if (!isBrain) return;
+  const plist = playerList();
+  if (!plist.length) return toast("Wait for at least one player to join");
+  const n = room.settings.rounds;
+  const isos = shuffle(C.map(c => c.iso)).slice(0, n);
+  const questions = isos.map(iso => room.settings.answers === "choice" ? { iso, options: makeOptions(iso) } : { iso });
+  const upd = { questions, answers: null, results: null, state: { phase: "count", q: 0, until: serverNow() + COUNT_MS } };
+  plist.forEach(p => { upd[`players/${p.id}/score`] = 0; upd[`players/${p.id}/streak`] = 0; upd[`players/${p.id}/rank`] = null; upd[`players/${p.id}/prevRank`] = null; upd[`players/${p.id}/lastPts`] = 0; });
+  for (const k in finished) delete finished[k];
+  roomRef.update(upd);
+}
+
+function onlineCount() { return playerList().filter(p => p.online !== false).length; }
+function allAnswered(q) {
+  const a = answersFor(q), on = playerList().filter(p => p.online !== false);
+  return on.length > 0 && on.every(p => a[p.id]);
+}
+
+function brainSchedule() {
+  clearTimeout(brainTimer); brainAction = null;
+  if (!isBrain || !room || !room.state) return;
+  const s = room.state, now = serverNow();
+  let due = null, act = null;
+  if (s.phase === "count") { due = s.until; act = () => roomRef.child("state").set({ phase: "question", q: s.q, start: serverNow(), end: serverNow() + room.settings.timer * 1000 }); }
+  else if (s.phase === "question") { due = allAnswered(s.q) ? now + 700 : s.end + 300; act = () => finishQuestion(s.q); }
+  else if (s.phase === "reveal") { due = s.at + REVEAL_MS; act = () => s.q + 1 < totalQ() ? roomRef.child("state").set({ phase: "board", q: s.q, at: serverNow() }) : roomRef.child("state").set({ phase: "podium", at: serverNow() }); }
+  else if (s.phase === "board") { due = s.at + BOARD_MS; act = () => roomRef.child("state").set({ phase: "count", q: s.q + 1, until: serverNow() + COUNT_MS }); }
+  const tvSkip = $("tvSkip"), phSkip = $("phSkip");
+  const canSkip = !!act;
+  if (tvSkip) tvSkip.classList.toggle("hidden", !(canSkip && role === "tv"));
+  if (phSkip) phSkip.classList.toggle("hidden", !canSkip);
+  if (!act) return;
+  const key = s.phase + ":" + s.q;
+  brainAction = () => { if (room && room.state && room.state.phase + ":" + room.state.q === key) act(); };
+  brainTimer = setTimeout(brainAction, Math.max(0, due - now));
+}
+function brainSkip() { if (brainAction) { clearTimeout(brainTimer); brainAction(); } }
+
+function finishQuestion(q) {
+  if (finished[q]) return; finished[q] = true;
+  const s = room.state, qd = qData(q), ans = answersFor(q), T = room.settings.timer * 1000;
+  const upd = {}, res = {}, plist = playerList();
+  plist.forEach(p => {
+    const a = ans[p.id], ok = !!(a && a.a === qd.iso);
+    const ms = a ? Math.max(0, (a.t || s.end) - s.start) : null;
+    const streak = ok ? (p.streak || 0) + 1 : 0;
+    const pts = ok ? Math.round(1000 - 500 * Math.min(1, ms / T)) + Math.min(500, (streak - 1) * 100) : 0;
+    res[p.id] = { a: a ? a.a : null, ok, pts, ms };
+    upd[`players/${p.id}/score`] = (p.score || 0) + pts;
+    upd[`players/${p.id}/streak`] = streak;
+    upd[`players/${p.id}/lastPts`] = pts;
+  });
+  const order = plist.map(p => ({ id: p.id, sc: (p.score || 0) + res[p.id].pts, j: p.joinedAt || 0 })).sort((a, b) => b.sc - a.sc || a.j - b.j);
+  order.forEach((x, i) => { upd[`players/${x.id}/prevRank`] = players()[x.id].rank || i + 1; upd[`players/${x.id}/rank`] = i + 1; });
+  upd[`results/${q}`] = res;
+  upd.state = { phase: "reveal", q, at: serverNow(), start: s.start };
+  roomRef.update(upd);
+}
+
+function backToLobby() {
+  if (!isBrain) return;
+  roomRef.update({ state: { phase: "lobby" }, questions: null, answers: null, results: null });
+}
+
+// =====================================================================
+// RENDER
+// =====================================================================
+let rafTimer = null;
+function render() {
+  const s = room.state || { phase: "lobby" };
+  const key = s.phase + ":" + (s.q == null ? "" : s.q);
+  const entering = key !== lastKey;
+  lastKey = key;
+  if (entering) { cancelAnimationFrame(rafTimer); laterTimers.forEach(clearTimeout); laterTimers.length = 0; }
+  if (role === "tv") renderTV(s, entering); else renderPhone(s, entering);
+}
+
+// ---------------- TV ----------------
+function renderTV(s, entering) {
+  showView("v-tv");
+  $("tvCodeChip").textContent = "Room " + code;
+  const qc = $("tvQChip");
+  qc.classList.toggle("hidden", s.phase === "lobby" || s.phase === "podium");
+  if (s.q != null) qc.textContent = `Question ${s.q + 1} / ${totalQ()}`;
+  if (s.phase === "lobby") return tvLobby();
+  if (s.phase === "count") { showSub("v-tv", "tvCountdown"); $("tvCountQ").textContent = `Question ${s.q + 1} of ${totalQ()}`; if (entering) countdownLoop(s.until, $("tvCountN")); if (entering) preGlobe(s.q); return; }
+  if (s.phase === "question") return tvQuestion(s, entering);
+  if (s.phase === "reveal") return tvReveal(s, entering);
+  if (s.phase === "board") return entering && tvBoard();
+  if (s.phase === "podium") return entering && tvPodium(s);
+}
+
+let qrMade = null;
+function tvLobby() {
+  showSub("v-tv", "tvLobby");
+  const url = location.origin + location.pathname + "?room=" + code;
+  $("tvUrl").textContent = url.replace(/^https?:\/\//, "");
+  $("tvCode").textContent = code;
+  if (qrMade !== code && window.QRCode) { $("tvQr").innerHTML = ""; new QRCode($("tvQr"), { text: url, width: 256, height: 256, colorDark: "#0e1738", colorLight: "#ffffff" }); qrMade = code; }
+  const list = playerList();
+  $("tvCount").textContent = list.length;
+  const grid = $("tvPlayers"), sz = sizeClass(list.length);
+  grid.dataset.size = sz;
+  const em = sz === "l" ? 3.2 : sz === "m" ? 2.6 : 2.4;
+  const html = list.map(p => `<div class="pcard ${p.online === false ? "off" : ""}" data-id="${p.id}">${avatarEm(p, em)}<div class="nm">${esc(p.name)}</div></div>`).join("") ||
+    `<div class="tvmuted" style="grid-column:1/-1;font-size:1.2em;padding:2em 0">Waiting for players… scan the QR code or go to the link and enter the code.</div>`;
+  if (grid.dataset.sig !== html) { grid.innerHTML = html; grid.dataset.sig = html; }
+  const st = room.settings;
+  $("tvSettings").innerHTML = settingsHTML(st);
+  $("tvStart").disabled = !list.length;
+}
+function settingsHTML(st) {
+  const seg = (k, opts) => `<div class="seg">${opts.map(([v, l]) => `<button class="${st[k] === v ? "sel" : ""}" onclick="setSetting('${k}', ${typeof v === "string" ? `'${v}'` : v})">${l}</button>`).join("")}</div>`;
+  return `<div><div class="lbl">Answers</div>${seg("answers", [["choice", "Multiple choice"], ["type", "Typing"]])}</div>
+    <div><div class="lbl">Rounds</div>${seg("rounds", [[5, "5"], [10, "10"], [15, "15"], [20, "20"]])}</div>
+    <div><div class="lbl">Timer</div>${seg("timer", [[10, "10s"], [20, "20s"], [30, "30s"]])}</div>`;
+}
+
+function countdownLoop(until, el) {
+  const step = () => {
+    const left = Math.max(0, until - serverNow());
+    el.textContent = Math.max(1, Math.ceil(left / 1000 - 0.5));
+    if (left > 0) rafTimer = requestAnimationFrame(step);
+  };
+  step();
+}
+function ensureTvGlobe() { if (!tvGlobe) tvGlobe = makeGlobe($("tvGlobe")); return tvGlobe; }
+function preGlobe(q) {
+  // during the countdown, start the trip so the globe arrives as the question opens
+  const qd = qData(q); if (!qd) return;
+  const g = role === "tv" ? ensureTvGlobe() : null;
+  if (g) { setTimeout(() => { g.resize(); g.show(null); }, 30); }
+}
+
+function tvQuestion(s, entering) {
+  showSub("v-tv", "tvPlay");
+  const g = ensureTvGlobe(), qd = qData(s.q);
+  if (entering) { g.resize(); g.show(qd.iso, false); g.goTo(qd.iso); }
+  const list = playerList(), ans = answersFor(s.q);
+  const n = list.filter(p => ans[p.id]).length;
+  const em = list.length <= 6 ? 3.4 : list.length <= 12 ? 2.6 : 2;
+  const panel = $("tvPanel");
+  if (entering) {
+    panel.innerHTML = `<div class="qtitle">Question ${s.q + 1} of ${totalQ()}</div><div class="qprompt">Which country is glowing?</div>
+      <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="8"/><circle id="tvRingArc" cx="50" cy="50" r="44" fill="none" stroke="#ffd56b" stroke-width="8" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0"/></svg><div class="num" id="tvRingNum"></div></div>
+      <div style="font-size:1.25em;font-weight:800"><span style="color:var(--gold)" id="tvLockN"></span> locked in</div>
+      <div class="lockrow" id="tvLock"></div>`;
+    const T = s.end - s.start;
+    const step = () => {
+      const left = Math.max(0, s.end - serverNow());
+      const a = $("tvRingArc"), num = $("tvRingNum");
+      if (!a) return;
+      a.setAttribute("stroke-dashoffset", (276.5 * (1 - left / T)).toFixed(1));
+      a.setAttribute("stroke", left < 5000 ? "#ff6b6b" : "#ffd56b");
+      num.textContent = Math.ceil(left / 1000);
+      if (left > 0) rafTimer = requestAnimationFrame(step);
+    };
+    step();
+  }
+  $("tvLockN").textContent = `${n} of ${list.length}`;
+  $("tvLock").innerHTML = list.map(p => `<div class="who ${ans[p.id] ? "in" : ""}">${avatarEm(p, em)}<span>${esc(p.name)}</span></div>`).join("");
+}
+
+function tvReveal(s, entering) {
+  if (!entering) return;
+  showSub("v-tv", "tvPlay");
+  const g = ensureTvGlobe(), qd = qData(s.q), res = resultsFor(s.q), list = playerList();
+  g.resize(); g.show(qd.iso, false); g.goTo(qd.iso);
+  const panel = $("tvPanel");
+  const elapsed = serverNow() - s.at;
+  panel.innerHTML = `<div class="suspense" id="tvSus">Everyone's locked in<span class="dots"></span></div><div id="tvRevealBody" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:1em"></div>`;
+  const body = $("tvRevealBody");
+  const choice = !!qd.options;
+  const em = list.length <= 8 ? 2.3 : 1.7;
+  const stack = ids => { const shown = ids.slice(0, 6).map(id => avatarEm(players()[id], em)).join(""); return shown + (ids.length > 6 ? `<span style="font-weight:800;align-self:center">+${ids.length - 6}</span>` : ""); };
+  later(() => {
+    $("tvSus").remove();
+    if (choice) {
+      const counts = qd.options.map(iso => list.filter(p => res[p.id] && res[p.id].a === iso).map(p => p.id));
+      const max = Math.max(1, ...counts.map(c => c.length));
+      body.innerHTML = `<div class="bars">${qd.options.map((iso, k) => `<div class="bar" id="bar${k}"><div class="stack">${stack(counts[k])}</div><div class="cnt">${counts[k].length}</div>
+        <div class="col" id="col${k}" style="background:${OPT[k].bg}"></div><div class="foot" style="background:${OPT[k].bg};color:${OPT[k].fg}">${shapeSvg(k)}<span>${esc(nameOf(iso))}</span></div></div>`).join("")}</div>
+        <div class="fastest" id="tvFast"></div>`;
+      body.querySelectorAll(".foot svg").forEach(sv => { sv.style.width = "1em"; sv.style.height = "1em"; });
+      requestAnimationFrame(() => requestAnimationFrame(() => counts.forEach((c, k) => { $("col" + k).style.height = (0.4 + 11 * c.length / max) + "em"; })));
+    } else {
+      const groups = {};
+      list.forEach(p => { const a = res[p.id] ? res[p.id].a : null; const k = a || "__none"; (groups[k] = groups[k] || []).push(p.id); });
+      if (!groups[qd.iso]) groups[qd.iso] = [];
+      const keys = Object.keys(groups).sort((a, b) => (a === "__none") - (b === "__none") || groups[b].length - groups[a].length);
+      body.innerHTML = `<div class="cards">${keys.map((k, i) => `<div class="acard" data-k="${k}" style="animation-delay:${i * 0.18}s"><b>${k === "__none" ? "No answer" : esc(nameOf(k))}</b><div class="stack" style="display:flex;gap:0.2em;flex-wrap:wrap;justify-content:center">${stack(groups[k]) || `<span class="tvmuted">nobody</span>`}</div></div>`).join("")}</div>
+        <div class="fastest" id="tvFast"></div>`;
+    }
+  }, SUSPENSE_MS - elapsed);
+  later(() => {
+    g.show(qd.iso, true);
+    panel.insertAdjacentHTML("afterbegin", `<div class="answerhead">It's <span>${esc(nameOf(qd.iso))}!</span></div>`);
+    if (choice) qd.options.forEach((iso, k) => { const b = $("bar" + k); if (b) b.classList.add(iso === qd.iso ? "right" : "dim"); });
+    else body.querySelectorAll(".acard").forEach(c => c.classList.add(c.dataset.k === qd.iso ? "right" : "dim"));
+    const right = list.filter(p => res[p.id] && res[p.id].ok).sort((a, b) => res[a.id].ms - res[b.id].ms);
+    const f = $("tvFast");
+    if (f) f.textContent = right.length ? `⚡ Fastest: ${right[0].name} in ${(res[right[0].id].ms / 1000).toFixed(1)}s` + (right.length === list.length ? " · Everyone got it!" : "") : "😬 Nobody got it!";
+    if (right.length) sparkBurst(innerWidth * 0.72, innerHeight * 0.45, ["#4ade80", "#ffd56b", "#ffffff"]);
+  }, CORRECT_AT - elapsed);
+}
+
+const laterTimers = [];
+function later(fn, ms) { laterTimers.push(setTimeout(fn, Math.max(0, ms))); }
+
+function tvBoard() {
+  showSub("v-tv", "tvBoard");
+  const list = ranked(), top = list.slice(0, 8);
+  // fit up to 8 rows in whatever height this screen has
+  const fontPx = parseFloat(getComputedStyle($("v-tv")).fontSize) || 18;
+  const availEm = innerHeight / fontPx - 14;
+  const rowH = Math.max(2.2, Math.min(3.9, availEm / Math.max(1, top.length)));
+  const el = $("tvBoard");
+  el.innerHTML = `<div class="boardtitle">Leaderboard</div><div class="board" id="tvBoardRows" style="height:${top.length * rowH}em"></div><div class="callout" id="tvCallout"></div>`;
+  const rows = $("tvBoardRows");
+  top.forEach(p => {
+    const prev = Math.min(p.prevRank || p.rank, 9);
+    const d = document.createElement("div");
+    d.className = "brow" + (p.rank === 1 ? " first" : "");
+    d.style.height = ((rowH - 0.45) * fontPx) + "px";
+    if (rowH < 3.2) d.style.fontSize = "0.82em";
+    d.style.top = ((prev - 1) * rowH * fontPx) + "px";
+    d.innerHTML = `<div class="rk">${p.rank}</div>${avatarEm(p, 2.4)}<div class="nm">${esc(p.name)}${p.streak >= 3 ? ` <span style="color:#ff9b73">🔥${p.streak}</span>` : ""}</div><div class="delta">${p.lastPts ? "+" + p.lastPts : ""}</div><div class="sc" data-to="${p.score || 0}" data-from="${(p.score || 0) - (p.lastPts || 0)}">${((p.score || 0) - (p.lastPts || 0)).toLocaleString()}</div>`;
+    rows.appendChild(d);
+    later(() => { d.style.top = ((p.rank - 1) * rowH * fontPx) + "px"; }, 700);
+  });
+  // count the scores up
+  const t0 = performance.now() + 300;
+  const step = now => {
+    const t = Math.min(1, Math.max(0, (now - t0) / 900));
+    rows.querySelectorAll(".sc").forEach(sc => { const a = +sc.dataset.from, b = +sc.dataset.to; sc.textContent = Math.round(a + (b - a) * t).toLocaleString(); });
+    if (t < 1) rafTimer = requestAnimationFrame(step);
+  };
+  rafTimer = requestAnimationFrame(step);
+  const climber = list.filter(p => p.prevRank && p.prevRank > p.rank).sort((a, b) => (b.prevRank - b.rank) - (a.prevRank - a.rank))[0];
+  const hot = list.filter(p => p.streak >= 3).sort((a, b) => b.streak - a.streak)[0];
+  $("tvCallout").textContent = climber ? `🚀 ${climber.name} climbed to ${ordinal(climber.rank)}!` : hot ? `🔥 ${hot.name} is on a ${hot.streak}-answer streak!` : list[0] ? `👑 ${list[0].name} leads the pack` : "";
+}
+
+function tvPodium(s) {
+  showSub("v-tv", "tvPodium");
+  const list = ranked();
+  const order = [list[1], list[0], list[2]];
+  const heights = ["24vh", "32vh", "18vh"], blocks = ["#d7dbe3", "#ffd56b", "#e0a07a"], sizes = [4.6, 5.8, 4.2];
+  const el = $("tvPodium");
+  el.innerHTML = `<div class="podtitle" id="podTitle">And the winner is<span class="dots"></span></div><div class="podsub" id="podSub"></div>
+    <div class="pods">${order.map((p, i) => p ? `<div class="pod" id="pod${i}">${avatarEm(p, sizes[i])}<div class="nm">${esc(p.name)}</div><div class="pts">${(p.score || 0).toLocaleString()} pts</div><div class="block" style="height:${heights[i]};background:${blocks[i]}"><span>${[2, 1, 3][i]}</span></div></div>` : "").join("")}</div>
+    <div class="others">${list.slice(3, 12).map(p => `<span>${ordinal(p.rank)} ${esc(p.name)} · ${(p.score || 0).toLocaleString()}</span>`).join("")}</div>
+    <div class="podbtns"><button class="btn gold small" onclick="backToLobby()">Play again</button><button class="tvbtn" onclick="endGame()">End game</button></div>`;
+  later(() => { const p = $("pod2"); if (p) p.classList.add("show"); }, 900);
+  later(() => { const p = $("pod0"); if (p) p.classList.add("show"); }, 2300);
+  later(() => {
+    const p = $("pod1"); if (p) p.classList.add("show");
+    if (list[0]) { $("podTitle").textContent = `${list[0].name} wins!`; $("podSub").textContent = "🎉 Thanks for playing Globle Party"; }
+    celebrate();
+  }, 4300);
+}
+
+// ---------------- PHONE ----------------
+let quizPicker = null;
+function renderPhone(s, entering) {
+  showView("v-ph");
+  const me = players()[uid];
+  if (!me) { // removed from the room
+    $("phName").textContent = "Not in this game";
+    showSub("v-ph", "phLobby");
+    $("phLobby").innerHTML = `<div class="card" style="text-align:center">You're not in this game any more.<br><br><button class="btn" onclick="showJoin('${code}')">Join again</button></div>`;
+    return;
+  }
+  const noTV = room.mode === "phones";
+  $("phAv").innerHTML = avatar(me, 42);
+  $("phName").textContent = me.name;
+  // during the drumroll, keep showing the old score so the header doesn't spoil the reveal
+  const hideNew = s.phase === "reveal" && serverNow() - s.at < CORRECT_AT;
+  phHeader(me, hideNew, s.phase);
+  if (hideNew) later(() => phHeader(players()[uid], false, s.phase), CORRECT_AT - (serverNow() - s.at));
+  $("phPill").textContent = s.phase === "lobby" ? code : s.q != null ? `Q${s.q + 1}/${totalQ()}` : code;
+  $("phHostBar").classList.toggle("hidden", !(isBrain && s.phase !== "lobby"));
+  if (s.phase === "lobby") return phLobby(noTV);
+  if (s.phase === "count") {
+    showSub("v-ph", "phCountdown");
+    if (entering) {
+      $("phCountdown").innerHTML = `<div class="fred" style="font-size:1.6rem;color:var(--muted)">Question ${s.q + 1} of ${totalQ()}</div><div class="fred" style="font-size:2.2rem;font-weight:700">Get ready!</div><div class="fred" id="phCountN" style="font-size:6rem;font-weight:700;color:var(--accent);animation:pulse 1s infinite">3</div>
+        <div style="color:var(--muted);font-weight:700">${noTV ? "Watch the globe on your phone" : "Eyes on the big screen 👀"}</div>`;
+      countdownLoop(s.until, $("phCountN"));
+    }
+    return;
+  }
+  if (s.phase === "question") return phQuestion(s, entering, noTV);
+  if (s.phase === "reveal") return entering && phReveal(s, noTV);
+  if (s.phase === "board") return entering && phBoard(noTV);
+  if (s.phase === "podium") return entering && phPodium();
+}
+
+function phHeader(me, hideNew, phase) {
+  if (!me) return;
+  const sc = hideNew ? (me.score || 0) - (me.lastPts || 0) : (me.score || 0);
+  const rk = !hideNew && me.rank && phase !== "lobby" ? " · " + ordinal(me.rank) : "";
+  $("phScore").textContent = sc.toLocaleString() + " pts" + rk;
+}
+function phLobby(noTV) {
+  showSub("v-ph", "phLobby");
+  const me = players()[uid], list = playerList();
+  const host = isBrain;
+  $("phLobby").innerHTML = `
+    <div style="text-align:center;margin-top:8px"><div class="bigav">${avatar(me, 96)}</div>
+      <div class="fred" style="font-size:1.8rem;font-weight:700;margin-top:8px">You're in!</div>
+      <div style="color:var(--muted);font-weight:700">${host ? `Room code <b style="color:var(--accent);font-size:1.2rem;letter-spacing:3px">${code}</b>. Friends join at this page with the code` : noTV ? "Waiting for the host to start…" : "Look at the big screen. The host will start soon"}</div></div>
+    <div class="card"><div class="lbl" style="margin-top:0">Players (${list.length})</div><div class="phlist">${list.map(p => `<span class="chip" style="opacity:${p.online === false ? 0.45 : 1}">${avatar(p, 28)}${esc(p.name)}</span>`).join("")}</div></div>
+    ${host ? `<div class="card">${settingsHTML(room.settings).replace(/<div><div class="lbl">/g, '<div><div class="lbl" style="margin-top:6px">')}</div>
+      <button class="btn" onclick="brainStart()">Start Quiz Show</button>` : ""}
+    <button class="btn ghost small" style="align-self:center" onclick="leaveRoom()">Leave game</button>`;
+}
+function leaveRoom() {
+  if (isBrain) return endGame();
+  if (!confirm("Leave this game?")) return;
+  roomRef.off(); store("globleparty.last", null);
+  db.ref(`rooms/${code}/players/${uid}`).remove().finally(goHome);
+}
+
+function phQuestion(s, entering, noTV) {
+  const qd = qData(s.q), ans = answersFor(s.q), mine = ans[uid];
+  if (mine) {
+    showSub("v-ph", "phWait");
+    const list = playerList(), n = list.filter(p => ans[p.id]).length;
+    $("phWait").innerHTML = `<div class="bigav">${avatar(players()[uid], 80)}</div><div class="locked">Locked in!</div>
+      <div style="font-weight:700;color:var(--muted)">${mine.a ? (qd.options ? "You picked " : "You said ") + `<b style="color:var(--ink)">${esc(nameOf(mine.a))}</b>` : ""}</div>
+      <div style="font-weight:800">${n} of ${list.length} answered<span class="dots"></span></div>`;
+    return;
+  }
+  showSub("v-ph", "phQuestion");
+  if (entering) {
+    const gw = $("phGlobe");
+    gw.classList.toggle("hidden", !noTV);
+    if (noTV) { if (!phGlobe) phGlobe = makeGlobe(gw); setTimeout(() => { phGlobe.resize(); phGlobe.show(qd.iso, false); phGlobe.goTo(qd.iso); }, 30); }
+    const area = $("phAnswerArea");
+    if (qd.options) {
+      area.innerHTML = `${noTV ? "" : `<div style="text-align:center;font-weight:800;color:var(--muted)">Which country is glowing on the big screen?</div>`}
+        <div class="opts ${noTV ? "compact" : ""}">${qd.options.map((iso, k) => `<button class="opt" style="background:${OPT[k].bg};color:${OPT[k].fg}" onclick="sendAnswer(${s.q}, '${iso}')">${shapeSvg(k)}<span>${esc(nameOf(iso))}</span></button>`).join("")}</div>`;
+    } else {
+      area.innerHTML = `<div style="text-align:center;font-weight:800">${noTV ? "Which country is glowing?" : "Which country is glowing on the big screen?"}</div>
+        <div class="picker"><div class="prow"><input class="text" id="qIn" placeholder="Type or pick a country…" autocomplete="off" autocorrect="off" spellcheck="false"><button class="btn small" onclick="quizPicker.enter()">Lock in</button></div><div class="suggest" id="qSug"></div></div>
+        <div style="text-align:center;color:var(--muted);font-size:0.85rem">Tap the box to scroll the full list, or start typing</div>`;
+      quizPicker = makePicker($("qIn"), $("qSug"), iso => sendAnswer(s.q, iso));
+    }
+    const pill = $("phTimer");
+    const step = () => {
+      const left = Math.max(0, s.end - serverNow());
+      pill.textContent = "⏱ " + Math.ceil(left / 1000) + "s";
+      pill.style.background = left < 5000 ? "#b91c1c" : "";
+      if (left > 0) rafTimer = requestAnimationFrame(step);
+    };
+    step();
+  }
+}
+function sendAnswer(q, iso) {
+  if (!room || room.state.phase !== "question" || room.state.q !== q) return;
+  if (answersFor(q)[uid]) return;
+  if (navigator.vibrate) navigator.vibrate(30);
+  db.ref(`rooms/${code}/answers/${q}/${uid}`).set({ a: iso, t: TS }).catch(() => toast("Too late!"));
+}
+
+function phReveal(s, noTV) {
+  const qd = qData(s.q), res = resultsFor(s.q)[uid] || { ok: false, pts: 0, a: null }, me = players()[uid];
+  const elapsed = serverNow() - s.at;
+  showSub("v-ph", "phReveal");
+  $("phReveal").innerHTML = noTV
+    ? `<div class="globewrap phglobe" id="phRevGlobe"></div><div class="fred" style="font-size:1.6rem;font-weight:700">Everyone's locked in<span class="dots"></span></div><div style="font-size:3rem">🥁</div>`
+    : `<div style="font-size:4rem;animation:pulse 0.6s infinite">🥁</div><div class="fred" style="font-size:1.8rem;font-weight:700">Drumroll<span class="dots"></span></div><div style="color:var(--muted);font-weight:700">Watch the big screen!</div>`;
+  if (noTV) {
+    const g = makeGlobe($("phRevGlobe"));
+    setTimeout(() => { g.resize(); g.show(qd.iso, false); g.goTo(qd.iso); }, 30);
+    later(() => g.show(qd.iso, true), CORRECT_AT - elapsed);
+  }
+  later(() => {
+    const cls = res.ok ? "ok" : res.a ? "no" : "none";
+    const head = res.ok ? "Correct!" : res.a ? "Not quite" : "Time's up!";
+    const above = ranked().find(p => p.rank === (me.rank || 1) - 1);
+    const rankLine = me.rank === 1 ? (ranked()[1] ? `Leading by ${((me.score || 0) - (ranked()[1].score || 0)).toLocaleString()}` : "Leading") : above ? `${((above.score || 0) - (me.score || 0)).toLocaleString()} behind ${esc(above.name)}` : "";
+    let mini = "";
+    if (noTV) {
+      const list = playerList(), all = resultsFor(s.q);
+      mini = `<div class="mini">${list.map(p => `<div><span>${esc(p.emoji)} ${esc(p.name)}</span><span>${all[p.id] && all[p.id].ok ? "✅ +" + all[p.id].pts : all[p.id] && all[p.id].a ? "❌ " + esc(nameOf(all[p.id].a)) : "⏳"}</span></div>`).join("")}</div>`;
+    }
+    $("phReveal").innerHTML = `<div class="resultfull ${cls}">
+      <div class="head">${head}</div>
+      ${res.ok ? `<div class="pts">+${res.pts}</div><div style="font-weight:700">Answered in ${(res.ms / 1000).toFixed(1)}s</div>${me.streak >= 2 ? `<div class="streak">🔥 ${me.streak} in a row${me.streak >= 2 ? ` · +${Math.min(500, (me.streak - 1) * 100)} bonus` : ""}</div>` : ""}`
+        : `<div style="font-size:1.2rem;font-weight:700">It was <b>${esc(nameOf(qd.iso))}</b>${res.a ? `<br><span style="opacity:0.85">You said ${esc(nameOf(res.a))}</span>` : ""}</div>`}
+      <div class="rank"><span style="color:var(--muted);font-weight:700">You're in</span><b>${ordinal(me.rank || 1)} place</b><span style="font-weight:700">${rankLine}</span></div>
+      ${mini}</div>`;
+    if (navigator.vibrate) navigator.vibrate(res.ok ? [40, 60, 40] : 200);
+    if (res.ok) miniBurst(innerWidth / 2, innerHeight * 0.35);
+  }, CORRECT_AT - elapsed);
+}
+
+function phBoard(noTV) {
+  showSub("v-ph", "phBoard");
+  const me = players()[uid], list = ranked();
+  const moved = me.prevRank && me.prevRank !== me.rank ? (me.prevRank > me.rank ? `⬆️ Up ${me.prevRank - me.rank} from ${ordinal(me.prevRank)}` : `⬇️ Down from ${ordinal(me.prevRank)}`) : "";
+  $("phBoard").innerHTML = `<div class="card" style="text-align:center;animation:popIn 0.4s ease"><div style="color:var(--muted);font-weight:800">You're</div><div class="place">${ordinal(me.rank || 1)}</div><div style="font-weight:800">${(me.score || 0).toLocaleString()} pts</div><div style="font-weight:700;color:var(--green)">${moved}</div></div>
+    ${noTV || list.length > 1 ? `<div class="lbl">Leaderboard</div><div class="lb">${list.slice(0, noTV ? 8 : 5).map(p => `<div class="r ${p.id === uid ? "me" : ""}"><span class="k">${p.rank}</span>${avatar(p, 30)}<span class="n">${esc(p.name)}</span><span>${(p.score || 0).toLocaleString()}</span></div>`).join("")}</div>` : ""}`;
+}
+
+function phPodium() {
+  showSub("v-ph", "phPodium");
+  const me = players()[uid], list = ranked();
+  const medal = ["🥇", "🥈", "🥉"][me.rank - 1] || "🎉";
+  const res = room.results || {};
+  let right = 0, fastest = null;
+  Object.values(res).forEach(r => { const x = r[uid]; if (x && x.ok) { right++; if (fastest === null || x.ms < fastest) fastest = x.ms; } });
+  $("phPodium").innerHTML = `<div style="font-size:4rem">${medal}</div><div class="fred" style="font-size:1.4rem;color:var(--muted)">You finished</div><div class="place">${ordinal(me.rank || 1)}</div>
+    <div style="font-weight:800">${(me.score || 0).toLocaleString()} pts · ${right}/${totalQ()} correct${fastest !== null ? ` · fastest ${(fastest / 1000).toFixed(1)}s` : ""}</div>
+    <div class="lb" style="max-width:360px">${list.slice(0, 5).map(p => `<div class="r ${p.id === uid ? "me" : ""}"><span class="k">${p.rank}</span>${avatar(p, 30)}<span class="n">${esc(p.name)}</span><span>${(p.score || 0).toLocaleString()}</span></div>`).join("")}</div>
+    ${isBrain ? `<button class="btn" onclick="backToLobby()">Play again</button>` : `<div style="color:var(--muted);font-weight:700">Waiting for the host…</div>`}`;
+  if (me.rank === 1) later(celebrate, 600);
+}
+
+// =====================================================================
+// CONFETTI & SPARKS
+// =====================================================================
+const fxC = $("fx"), fx = fxC.getContext("2d");
+let fxW = 0, fxH = 0, parts = [], fxOn = false, fxLast = 0;
+function fxResize() { fxW = innerWidth; fxH = innerHeight; fxC.width = fxW; fxC.height = fxH; }
+fxResize(); addEventListener("resize", () => { fxResize(); if (tvGlobe) tvGlobe.resize(); if (phGlobe) phGlobe.resize(); });
+const rand = (a, b) => a + Math.random() * (b - a), pickOne = a => a[Math.floor(Math.random() * a.length)];
+const PAL = ["#e4572e", "#f9a95a", "#ffd23f", "#2f9e58", "#3fa7d6", "#7b5ea7", "#ff7aa2"];
+function fxAdd(p) { if (parts.length >= 260) return; p.life = 0; parts.push(p); if (!fxOn) { fxOn = true; fxLast = performance.now(); requestAnimationFrame(fxLoop); } }
+function fxLoop(now) {
+  const dt = Math.min(0.05, (now - fxLast) / 1000); fxLast = now;
+  fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, fxW, fxH);
+  let w = 0;
+  for (const p of parts) {
+    p.life += dt; if (p.life >= p.max) continue;
+    const k = 1 - p.drag * dt; p.vx *= k; p.vy *= k; p.vy += p.g * dt;
+    p.x += p.vx * dt + (p.sway ? Math.sin(p.life * p.swayF + p.phase) * p.sway * dt : 0); p.y += p.vy * dt;
+    if (p.y > fxH + 30 && p.vy > 0) continue;
+    const t = p.life / p.max;
+    fx.globalAlpha = t > 0.8 ? (1 - t) * 5 : 1; fx.fillStyle = p.color;
+    if (p.kind === 0) { p.rot += p.vr * dt; const c = Math.cos(p.rot), s = Math.sin(p.rot), f = Math.cos(p.life * p.flipF + p.phase); fx.setTransform(c, s, -s * f, c * f, p.x, p.y); fx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); }
+    else { fx.setTransform(1, 0, 0, 1, 0, 0); const r = p.size * (1 - t * 0.5); fx.fillRect(p.x - r, p.y - r, r * 2, r * 2); }
+    parts[w++] = p;
+  }
+  parts.length = w; fx.setTransform(1, 0, 0, 1, 0, 0); fx.globalAlpha = 1;
+  if (w) requestAnimationFrame(fxLoop); else { fxOn = false; fx.clearRect(0, 0, fxW, fxH); }
+}
+const confetto = (x, y, vx, vy, g) => fxAdd({ kind: 0, x, y, vx, vy, g, drag: 1.8, rot: rand(0, 6), vr: rand(-8, 8), sway: rand(10, 50), swayF: rand(2, 5), phase: rand(0, 6), flipF: rand(5, 12), size: rand(8, 14), color: pickOne(PAL), max: rand(3.5, 5.5) });
+function sparkBurst(x, y, pal = PAL, n = 34) { for (let i = 0; i < n; i++) { const a = rand(0, 6.28), v = rand(90, 320); fxAdd({ kind: 1, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 170, drag: 1.3, max: rand(0.8, 1.4), size: rand(1.8, 3.2), color: pickOne(pal) }); } }
+function miniBurst(x, y) { for (let i = 0; i < 26; i++) confetto(x, y, rand(-260, 260), rand(-520, -220), 520); }
+function celebrate() {
+  for (let i = 0; i < 55; i++) { const sp = rand(-0.35, 0.35); confetto(0, fxH, Math.sin(0.75 + sp) * rand(500, 1050), -Math.cos(0.75 + sp) * rand(800, 1400), 450); confetto(fxW, fxH, -Math.sin(0.75 + sp) * rand(500, 1050), -Math.cos(0.75 + sp) * rand(800, 1400), 450); }
+  const end = performance.now() + 3500;
+  const rain = setInterval(() => { if (performance.now() > end) return clearInterval(rain); for (let i = 0; i < 3; i++) confetto(rand(0, fxW), -15, rand(-40, 40), rand(40, 160), 420); }, 100);
+  [400, 1100, 1900].forEach(d => setTimeout(() => sparkBurst(rand(fxW * 0.15, fxW * 0.85), rand(fxH * 0.1, fxH * 0.4)), d));
+}
+</script>
+</body>
+</html>
